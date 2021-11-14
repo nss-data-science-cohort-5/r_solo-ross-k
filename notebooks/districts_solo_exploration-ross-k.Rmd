@@ -1,0 +1,78 @@
+---
+title: "districts_solo_exploration-ross-k"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+```
+```{r}
+districts = read_csv('../data/districts.csv')
+spec(districts)
+```
+
+```{r}
+# 1) Clean and explore data using tidyverse verbs, e.g. arrange, filter, mutate, and select.
+```
+
+```{r}
+districts
+```
+```{r}
+districts %>% 
+  arrange(desc(enrollment)) %>% 
+  select(system_name, enrollment)
+```
+
+
+```{r}
+# 2) Calculate descriptive statistics, including finding aggregate values by group.
+regional_spending <- districts %>% 
+  group_by(region, system_name) %>% 
+  summarize(median_reg_spending = median(expenditures))
+
+regional_act <- districts %>% 
+  group_by(region, system_name) %>% 
+  summarize(median_reg_act = median(act_composite)) 
+
+regional_grad <- districts %>% 
+  group_by(region, system_name) %>% 
+  summarize(mean_reg_grad = mean(grad)) 
+
+regional_enrollment <- districts %>% 
+  group_by(region, system_name) %>% 
+  summarize(max_reg_enrollment = max(enrollment))
+```
+```{r}
+# 3) Create visualizations using the ggplot library.
+
+ggplot(regional_act,
+       aes(x = region,
+           y = median_reg_act,
+           color = region)) +
+  geom_point()
+```
+```{r}
+ggplot(regional_grad,
+       aes(x = region,
+           y = mean_reg_grad,
+           color = region)) +
+  geom_point()
+```
+```{r}
+ggplot(regional_enrollment,
+       aes(x = region,
+           y = max_reg_enrollment,
+           color = region)) +
+  geom_point()
+```
+```{r}
+ggplot(regional_spending,
+       aes(x = region,
+           y = median_reg_spending,
+           color = region)) +
+  geom_point() +
+  expand_limits(y = 0)
+```
+
