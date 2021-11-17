@@ -4,8 +4,9 @@ output: html_notebook
 ---
 
 ```{r}
-library(tidyverse)
+library(dplyr)
 library(ggplot2)
+library(tidyverse)
 ```
 ```{r}
 districts = read_csv('../data/districts.csv')
@@ -20,9 +21,13 @@ spec(districts)
 districts
 ```
 ```{r}
+is.na(districts)
+```
+
+```{r}
 districts %>% 
-  arrange(desc(enrollment)) %>% 
-  select(system_name, enrollment)
+  select(system_name, enrollment, expenditures) %>%
+  arrange(desc(enrollment))
 ```
 
 
@@ -34,7 +39,8 @@ regional_spending <- districts %>%
 
 regional_act <- districts %>% 
   group_by(region, system_name) %>% 
-  summarize(median_reg_act = median(act_composite)) 
+  summarize(median_reg_act = median(act_composite),
+            max_reg_act = max(act_composite)) 
 
 regional_grad <- districts %>% 
   group_by(region, system_name) %>% 
@@ -47,12 +53,23 @@ regional_enrollment <- districts %>%
 ```{r}
 # 3) Create visualizations using the ggplot library.
 
-ggplot(regional_act,
-       aes(x = region,
-           y = median_reg_act,
-           color = region)) +
-  geom_point()
+          # FROM 11/16/2021 AGGREGATIONS_DEMO:
+  
+districts %>% 
+  ggplot(aes(x = expenditures)) +
+  geom_histogram(bins = 100,
+                 fill = 'blue', 
+                 color = 'black') +
+  # labs(title = 'Distribution of Body Mass by Species', x = 'Body Mass (g)') +
+  theme(plot.title = element_text(hjust = 0.5))
 ```
+```{r}
+ggplot(regional_act,
+       aes(x = median_reg_act,
+           color = region)) +
+  geom_bar()
+```
+
 ```{r}
 ggplot(regional_grad,
        aes(x = region,
