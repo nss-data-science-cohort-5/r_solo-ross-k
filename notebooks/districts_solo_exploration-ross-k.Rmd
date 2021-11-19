@@ -21,7 +21,7 @@ spec(districts)
 districts
 ```
 ```{r}
-is.na(districts)
+# is.na(districts)
 ```
 
 ```{r}
@@ -29,10 +29,28 @@ districts %>%
   select(system_name, enrollment, expenditures) %>%
   arrange(desc(enrollment))
 ```
+```{r}
+districts %>% 
+  select(system_name, expenditures, enrollment) %>%
+  arrange(desc(expenditures))
+```
+```{r}
+districts %>% 
+  select(system_name, chronic_abs) %>%
+  arrange(desc(chronic_abs))
+```
+```{r}
+districts %>% 
+  select(system_name, suspended) %>%
+  arrange(desc(suspended))
+```
 
 
 ```{r}
 # 2) Calculate descriptive statistics, including finding aggregate values by group.
+
+# TRY select(where(...) & !...) - SEE 11/18 correlation_and_linear_regression
+
 regional_spending <- districts %>% 
   group_by(region, system_name) %>% 
   summarize(median_reg_spending = median(expenditures))
@@ -50,11 +68,29 @@ regional_enrollment <- districts %>%
   group_by(region, system_name) %>% 
   summarize(max_reg_enrollment = max(enrollment))
 ```
+
+```{r}
+districts %>%
+  slice_max(black)
+```
+
+
+```{r}
+districts %>%
+  slice_max(hispanic)
+```
+
+
+```{r}
+districts %>%
+  slice_max(native)
+```
+
+
 ```{r}
 # 3) Create visualizations using the ggplot library.
 
-          # FROM 11/16/2021 AGGREGATIONS_DEMO:
-  
+# FROM 11/16/2021 aggregations_demo:
 districts %>% 
   ggplot(aes(x = expenditures)) +
   geom_histogram(bins = 100,
@@ -91,5 +127,64 @@ ggplot(regional_spending,
            color = region)) +
   geom_point() +
   expand_limits(y = 0)
+```
+```{r}
+# 4) Calculate correlations and fit a linear regression model using the 'lm' function.
+
+dists_cor <- districts %>% 
+  select(where(is.numeric)) %>%
+  cor(use = 'pairwise.complete.obs') %>%
+  as_tibble()
+```
+
+```{r}
+dists_obj
+```
+
+```{r}
+simple_reg <- lm(math ~ ela,
+                 data = districts)
+summary(simple_reg)
+```
+
+```{r}
+predict(simple_reg, 
+        newdata = districts)
+```
+
+```{r}
+districts %>%
+  mutate(prediction = predict(simple_reg, 
+                              newdata = districts)) %>%
+  ggplot(aes(x = ela,
+             y = math)) +
+      geom_point() +
+      geom_line(aes(x = ela,
+                    y = prediction))
+```
+
+```{r}
+predict(simple_reg, 
+        districts, 
+        interval = c('confidence'), 
+        level = 0.95) %>% 
+  head()
+```
+
+```{r}
+districts %>% 
+  cbind(predict(simple_reg, 
+                districts, 
+                interval = c('confidence'), 
+                level = 0.95)) %>% 
+  ggplot(aes(x = ela, 
+             y = math)) + 
+  geom_point() +
+  geom_line(aes(x = ela, 
+                y = fit)) +
+  geom_ribbon(aes(ymin = lwr, 
+                  ymax = upr), 
+              fill = 'cornflowerblue', 
+              alpha = 0.4)
 ```
 
