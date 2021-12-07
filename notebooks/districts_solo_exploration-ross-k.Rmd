@@ -90,8 +90,7 @@ districts %>%
   ggplot(aes(x = alg_1,
              y = alg_2)) +
   geom_point() +
-  facet_wrap(~region,
-             nrow = 8) +
+  facet_wrap(~region) +
   labs(title = 'Distribution of Algebra 1 vs Algebra 2 Proficiencies',
        x = 'Algebra 1 Proficiency',
        y = 'Algebra 2 Proficiency') 
@@ -105,7 +104,10 @@ districts %>%
   group_by(region) %>%
   ggplot(aes(x = region,
              y = enrollment)) +
-  geom_col()
+  geom_col() +
+  theme(axis.text.x = element_text(angle = 45,
+                                   hjust = 1))
+
 ```
 
 ```{r}
@@ -114,8 +116,9 @@ districts %>%
 # Four districts have missing enrollment values.
 
 districts %>%
-  filter(is.na(enrollment)) %>%
+  filter(is.na(enrollment)) %>% 
   count()
+
 ```
 
 ```{r}
@@ -131,13 +134,12 @@ districts %>%
 ```{r}
 # 13. Redo the previous question but use a weighted average (`weighted.mean`) graduation across all districts, weighing by enrollment. How much does this change your answer? Can you explain using the data the reason for the big change from using the mean?
 
-# 
+# The new mean, weighted by enrollment, is ~ 87.33, a change of almost 3%.
 
 districts %>%
-  group
-  weighted.mean(grad,
-                145,
-                na.rm = TRUE))
+  drop_na(grad, enrollment) %>%
+  summarise(grad_mean_wtd = weighted.mean(grad, enrollment))
+
 ```
 
 ```{r}
@@ -148,7 +150,10 @@ districts %>%
 districts %>% 
   ggplot(aes(x = region,
              y = enrollment)) +
-  geom_boxplot()
+  geom_boxplot() +
+  theme(axis.text.x = element_text(angle = 45,
+                                   hjust = 1))
+
 ```
 
 ```{r}
@@ -159,13 +164,19 @@ districts %>%
 districts %>% 
   ggplot(aes(x = region,
              y = grad)) +
-  geom_boxplot()
+  geom_boxplot() +
+  theme(axis.text.x = element_text(angle = 45,
+                                   hjust = 1))
 ```
 ```{r}
 # 16. Find the weighted average of graduation rates by region using enrollment as weights. Compare the results you get for the weighted average to what you see from the boxplots. Can you explain any discrepancy?
 
-# 
+# I notice that the weighted rates seem to have dropped for the Mid-Cumberland and Southwest / Memphis regions, which have by far the highest enrollments.  
 
+districts %>%
+  drop_na(grad, enrollment) %>%
+  group_by(region) %>%
+  summarise(grad_mean_wtd = weighted.mean(grad, enrollment))
 
 ```
 
